@@ -83,7 +83,7 @@
   /* layout classes are set from the game's own width and height, because the page may be turned by CSS (body.rot) */
   body.port-narrow #hint { left:calc(10px + var(--sl)); right:calc(10px + var(--sr)); width:auto; }
   body.port-narrow #guide { left:calc(10px + var(--sl)); right:calc(10px + var(--sr)); width:auto; transform:none; bottom:calc(196px + var(--sb)); }
-  body.land-small #banner { top:calc(8px + var(--st)); transform:translateX(-50%); width:min(calc(62*var(--vw)),560px); padding:10px 14px; }
+  body.land-small #banner { top:calc(8px + var(--st)); left:calc(10px + var(--sl)); right:calc(122px + var(--sr)); transform:none; width:auto; padding:8px 12px; }
   body.land-small #banner .o { font-size:14px; }
   body.land-small #banner .r { font-size:12px; line-height:1.4; margin-top:3px; }
   body.land-small #hint { top:calc(10px + var(--st)); left:calc(calc(46*var(--vw)) + 18px + var(--sl)); right:calc(122px + var(--sr)); width:auto; padding:8px 12px; }
@@ -149,7 +149,7 @@
   </div>
 </div>
 
-<script src="stages.js?v=0927"></script>
-<script type="module" src="game.js?v=0927"></script>
+<script src="stages.js?v=0928"></script>
+<script type="module" src="game.js?v=0928"></script>
 </body>
 </html>
