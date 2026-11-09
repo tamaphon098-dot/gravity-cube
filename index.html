@@ -18,46 +18,46 @@
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 <style>
-  :root { --ink:#e8f1f4; --dim:#9fb2ba; --acc:#5ff0dc; --gold:#ffcf5a; --bg:#0b1418; --panel:rgba(10,20,24,.78); }
+  :root { --vw:1vw; --vh:1vh; --sl:env(safe-area-inset-left); --st:env(safe-area-inset-top); --sr:env(safe-area-inset-right); --sb:env(safe-area-inset-bottom); --ink:#e8f1f4; --dim:#9fb2ba; --acc:#5ff0dc; --gold:#ffcf5a; --bg:#0b1418; --panel:rgba(10,20,24,.78); }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); overflow:hidden; overscroll-behavior:none;
     font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI","Meiryo",system-ui,sans-serif; touch-action:none; user-select:none; -webkit-user-select:none; }
   #gl { position:fixed; inset:0; width:100%; height:100%; display:block; }
   .box { background:var(--panel); border:1px solid rgba(255,255,255,.12); border-radius:12px; }
-  #obj { position:fixed; left:calc(10px + env(safe-area-inset-left)); top:calc(10px + env(safe-area-inset-top)); max-width:min(46vw,380px); padding:8px 12px; pointer-events:none; }
+  #obj { position:fixed; left:calc(10px + var(--sl)); top:calc(10px + var(--st)); max-width:min(calc(46*var(--vw)),380px); padding:8px 12px; pointer-events:none; }
   #obj .h { font-size:11px; color:var(--acc); letter-spacing:.2em; }
   #obj .o { font-size:14px; line-height:1.45; margin:2px 0 4px; }
   #obj .p { font-size:13px; color:var(--acc); }
-  .tr { position:fixed; right:calc(10px + env(safe-area-inset-right)); top:calc(10px + env(safe-area-inset-top)); display:flex; gap:10px; }
+  .tr { position:fixed; right:calc(10px + var(--sr)); top:calc(10px + var(--st)); display:flex; gap:10px; }
   .round { width:56px; height:56px; border-radius:50%; font-size:24px; font-weight:700; color:var(--ink); background:rgba(10,20,24,.55); border:2px solid rgba(255,255,255,.55); }
   #reticle { position:fixed; left:50%; top:50%; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:rgba(255,255,255,.9); pointer-events:none; }
   #ring { position:fixed; left:50%; top:50%; width:46px; height:46px; margin:-23px 0 0 -23px; border-radius:50%; border:2.5px solid var(--acc); pointer-events:none; opacity:0; transition:opacity .12s; }
   #ring.gold { border-color:var(--gold); }
   #focus { position:fixed; left:50%; top:calc(50% + 36px); transform:translateX(-50%); font-size:15px; text-align:center; pointer-events:none; text-shadow:0 1px 3px #000; white-space:nowrap; }
   #focus small { display:block; color:var(--dim); font-size:12px; }
-  #msg { position:fixed; left:50%; top:24%; transform:translateX(-50%); font-size:16px; text-align:center; pointer-events:none; text-shadow:0 1px 3px #000; width:min(90vw,640px); transition:opacity .4s; }
-  #hint { position:fixed; right:calc(10px + env(safe-area-inset-right)); top:calc(76px + env(safe-area-inset-top)); width:min(60vw,380px); padding:10px 14px; pointer-events:none; transition:opacity .4s; }
+  #msg { position:fixed; left:50%; top:24%; transform:translateX(-50%); font-size:16px; text-align:center; pointer-events:none; text-shadow:0 1px 3px #000; width:min(calc(90*var(--vw)),640px); transition:opacity .4s; }
+  #hint { position:fixed; right:calc(10px + var(--sr)); top:calc(76px + var(--st)); width:min(calc(60*var(--vw)),380px); padding:10px 14px; pointer-events:none; transition:opacity .4s; }
   #hint .h { font-size:11px; color:var(--acc); letter-spacing:.2em; }
   #hint .t { font-size:14px; line-height:1.55; margin-top:4px; }
-  #guide { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(16px + env(safe-area-inset-bottom)); width:min(64vw,620px); padding:10px 14px; text-align:center; font-size:14px; line-height:1.5; pointer-events:none; transition:opacity .4s; }
+  #guide { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(16px + var(--sb)); width:min(calc(64*var(--vw)),620px); padding:10px 14px; text-align:center; font-size:14px; line-height:1.5; pointer-events:none; transition:opacity .4s; }
   #guide.gold { color:#ffdb8c; border-color:rgba(255,207,90,.45); }
-  #banner { position:fixed; left:50%; top:30%; transform:translate(-50%,-50%); width:min(92vw,720px); padding:18px 22px; text-align:center; pointer-events:none; transition:opacity .6s; }
+  #banner { position:fixed; left:50%; top:30%; transform:translate(-50%,-50%); width:min(calc(92*var(--vw)),720px); padding:18px 22px; text-align:center; pointer-events:none; transition:opacity .6s; }
   #banner .n { color:var(--acc); font-size:13px; letter-spacing:.25em; }
   #banner .t { font-size:30px; margin:4px 0 8px; }
   #banner .o { font-size:17px; }
   #banner .r { font-size:13px; color:var(--dim); margin-top:6px; white-space:pre-line; line-height:1.6; }
-  #gbtn { position:fixed; right:calc(22px + env(safe-area-inset-right)); bottom:calc(24px + env(safe-area-inset-bottom)); width:118px; height:118px; border-radius:50%;
+  #gbtn { position:fixed; right:calc(22px + var(--sr)); bottom:calc(24px + var(--sb)); width:118px; height:118px; border-radius:50%;
     background:rgba(10,20,24,.5); border:3px solid rgba(255,255,255,.75); color:var(--ink); font-size:42px; display:none; }
   #gbtn.can { border-color:var(--acc); color:var(--acc); box-shadow:0 0 18px rgba(95,240,220,.45); }
   #gbtn.hintc { border-color:var(--gold); color:var(--gold); box-shadow:0 0 22px rgba(255,207,90,.6); }
-  #glabel { position:fixed; right:calc(22px + env(safe-area-inset-right)); width:118px; bottom:calc(150px + env(safe-area-inset-bottom)); text-align:center; font-size:13px; text-shadow:0 1px 3px #000; pointer-events:none; display:none; }
-  #ctx { position:fixed; right:calc(160px + env(safe-area-inset-right)); bottom:calc(40px + env(safe-area-inset-bottom)); padding:12px 16px; font-size:15px; display:none; color:var(--ink); background:rgba(20,38,45,.9); border:1.5px solid rgba(95,240,220,.45); border-radius:12px; }
+  #glabel { position:fixed; right:calc(22px + var(--sr)); width:118px; bottom:calc(150px + var(--sb)); text-align:center; font-size:13px; text-shadow:0 1px 3px #000; pointer-events:none; display:none; }
+  #ctx { position:fixed; right:calc(160px + var(--sr)); bottom:calc(40px + var(--sb)); padding:12px 16px; font-size:15px; display:none; color:var(--ink); background:rgba(20,38,45,.9); border:1.5px solid rgba(95,240,220,.45); border-radius:12px; }
   #stick, #knob { position:fixed; border-radius:50%; pointer-events:none; display:none; }
   #stick { width:130px; height:130px; margin:-65px 0 0 -65px; border:2px solid rgba(255,255,255,.45); background:rgba(255,255,255,.06); }
   #knob { width:58px; height:58px; margin:-29px 0 0 -29px; background:rgba(200,255,247,.55); }
   .ov { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(5,10,12,.72); padding:14px; z-index:10; }
   .ov.hide { display:none; }
-  .card { width:min(94vw,480px); max-height:94vh; overflow:auto; background:rgba(14,26,31,.94); border:1px solid rgba(95,240,220,.3); border-radius:18px; padding:18px; text-align:center; position:relative; }
+  .card { width:min(calc(94*var(--vw)),480px); max-height:calc(94*var(--vh)); overflow:auto; background:rgba(14,26,31,.94); border:1px solid rgba(95,240,220,.3); border-radius:18px; padding:18px; text-align:center; position:relative; }
   .card h1 { margin:0; font-size:30px; letter-spacing:.04em; line-height:1.15; }
   .card h1 span { color:var(--acc); }
   .card .sub { color:var(--dim); font-size:13px; margin:6px 0 10px; }
@@ -79,19 +79,21 @@
   .clear .stats { font-size:17px; margin:6px 0 2px; }
   .clear .star { color:var(--gold); font-size:15px; min-height:20px; }
   .hidden { display:none !important; }
-  @media (max-width:759px) and (orientation:portrait) {
-    #hint { left:calc(10px + env(safe-area-inset-left)); right:calc(10px + env(safe-area-inset-right)); width:auto; }
-    #guide { left:calc(10px + env(safe-area-inset-left)); right:calc(10px + env(safe-area-inset-right)); width:auto; transform:none; bottom:calc(196px + env(safe-area-inset-bottom)); }
-  }
-  @media (max-height:520px) and (orientation:landscape) {
-    #banner { top:calc(8px + env(safe-area-inset-top)); transform:translateX(-50%); width:min(62vw,560px); padding:10px 14px; }
-    #banner .o { font-size:14px; } #banner .r { font-size:12px; line-height:1.4; margin-top:3px; }
-    #hint { top:calc(10px + env(safe-area-inset-top)); left:calc(46vw + 18px + env(safe-area-inset-left)); right:calc(122px + env(safe-area-inset-right)); width:auto; padding:8px 12px; }
-    #hint .t { font-size:13px; line-height:1.45; }
-  }
-  #mRotate { display:none; margin:8px 0 0; font-size:13px; color:var(--gold); text-align:center; }
-  @media (orientation:portrait) { body.rotate-tip #mRotate { display:block; } }
-  @media (max-height:520px) { #banner .t { font-size:22px; } .round { width:48px; height:48px; font-size:20px; } #gbtn { width:100px; height:100px; } #glabel { bottom:calc(130px + env(safe-area-inset-bottom)); width:100px; } }
+  /* layout classes are set from the game's own width and height, because the page may be turned by CSS (body.rot) */
+  body.port-narrow #hint { left:calc(10px + var(--sl)); right:calc(10px + var(--sr)); width:auto; }
+  body.port-narrow #guide { left:calc(10px + var(--sl)); right:calc(10px + var(--sr)); width:auto; transform:none; bottom:calc(196px + var(--sb)); }
+  body.land-small #banner { top:calc(8px + var(--st)); transform:translateX(-50%); width:min(calc(62*var(--vw)),560px); padding:10px 14px; }
+  body.land-small #banner .o { font-size:14px; }
+  body.land-small #banner .r { font-size:12px; line-height:1.4; margin-top:3px; }
+  body.land-small #hint { top:calc(10px + var(--st)); left:calc(calc(46*var(--vw)) + 18px + var(--sl)); right:calc(122px + var(--sr)); width:auto; padding:8px 12px; }
+  body.land-small #hint .t { font-size:13px; line-height:1.45; }
+  body.land-small #banner .t { font-size:22px; }
+  body.land-small .round { width:48px; height:48px; font-size:20px; }
+  body.land-small #gbtn { width:100px; height:100px; }
+  body.land-small #glabel { bottom:calc(130px + var(--sb)); width:100px; }
+  /* a phone that stays upright: the whole game is turned 90 degrees, so it is landscape when the phone is held sideways */
+  body.rot { position:fixed; left:0; top:0; transform-origin:0 0;
+    --sl:env(safe-area-inset-top); --st:env(safe-area-inset-right); --sr:env(safe-area-inset-bottom); --sb:env(safe-area-inset-left); }
 </style>
 </head>
 <body>
@@ -120,7 +122,6 @@
     <div class="stages" id="mStages"></div>
     <a class="wide play btn" id="mPlay" target="_blank" rel="noopener"></a>
     <div class="note" id="mNote"></div>
-    <div id="mRotate"></div>
   </div>
 </div>
 
@@ -147,7 +148,7 @@
   </div>
 </div>
 
-<script src="stages.js?v=0924"></script>
-<script type="module" src="game.js?v=0924"></script>
+<script src="stages.js?v=0925"></script>
+<script type="module" src="game.js?v=0925"></script>
 </body>
 </html>

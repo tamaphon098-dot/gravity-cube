@@ -12,6 +12,11 @@ const W = 7, H = 6;
 const DIRS = { R: [1, 0], L: [-1, 0], U: [0, 1], D: [0, -1] };
 const ARROWS = { '>': 'R', '<': 'L', '^': 'U', 'v': 'D' };
 const IS_TOUCH = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+// The game's own size. They differ from the window while an upright phone shows the game turned 90 degrees (see updateLayout).
+let turned = false, turnAllowed = true;
+const viewW = () => turned ? window.innerHeight : window.innerWidth;
+const viewH = () => turned ? window.innerWidth : window.innerHeight;
+const pointerPos = (e) => turned ? { x: e.clientY, y: window.innerWidth - e.clientX } : { x: e.clientX, y: e.clientY };
 
 // ------------------------------------------------------------------ text (ja / en)
 const T = {
@@ -41,7 +46,6 @@ const T = {
     star: '★ 最短手数でクリア！', starNo: (p) => `最短は ${p} 手。もっと短くできる？`,
     share: 'X でポストする', next: '次の問題へ', again: 'もう一度',
     shareText: (tier, m, best) => `【グラビティ・キューブ】${tier}を${m}手でクリア！${best ? '★最短' : ''}\n重力を切り替えて解く3Dパズル、あなたは解ける？`,
-    rotate: 'スマホを横向きにすると遊びやすい',
     lang: 'EN', best: (b) => `ベスト ${b} 手`, par: (p) => `最短 ${p} 手`,
   },
   en: {
@@ -70,7 +74,6 @@ const T = {
     star: '★ Perfect — fewest moves!', starNo: (p) => `The best is ${p} moves. Can you do better?`,
     share: 'Post on X', next: 'Next puzzle', again: 'Play again',
     shareText: (tier, m, best) => `GRAVITY VAULT: cleared ${tier} in ${m} moves!${best ? ' ★ perfect' : ''}\nA 3D puzzle where you switch gravity. Can you solve it?`,
-    rotate: 'Turn your phone sideways for easier play',
     lang: '日本語', best: (b) => `Best ${b}`, par: (p) => `Best ${p}`,
   },
 };
@@ -528,25 +531,27 @@ function look(dyaw, dpitch) {
 canvas.addEventListener('pointerdown', (e) => {
   if (!IS_TOUCH || !playing()) return;
   try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-  input.taps.set(e.pointerId, { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0 });
-  if (e.clientX < window.innerWidth * 0.42 && input.stickId === null) {
-    input.stickId = e.pointerId; input.stick = { ox: e.clientX, oy: e.clientY, x: e.clientX, y: e.clientY };
+  const p = pointerPos(e);
+  input.taps.set(e.pointerId, { x: p.x, y: p.y, t: performance.now(), moved: 0 });
+  if (p.x < viewW() * 0.42 && input.stickId === null) {
+    input.stickId = e.pointerId; input.stick = { ox: p.x, oy: p.y, x: p.x, y: p.y };
     $('stick').style.display = $('knob').style.display = 'block';
-    $('stick').style.left = e.clientX + 'px'; $('stick').style.top = e.clientY + 'px';
-    $('knob').style.left = e.clientX + 'px'; $('knob').style.top = e.clientY + 'px';
-  } else if (input.lookId === null) { input.lookId = e.pointerId; input.lookLast = { x: e.clientX, y: e.clientY }; }
+    $('stick').style.left = p.x + 'px'; $('stick').style.top = p.y + 'px';
+    $('knob').style.left = p.x + 'px'; $('knob').style.top = p.y + 'px';
+  } else if (input.lookId === null) { input.lookId = e.pointerId; input.lookLast = { x: p.x, y: p.y }; }
 });
 canvas.addEventListener('pointermove', (e) => {
   if (!IS_TOUCH) return;
+  const p = pointerPos(e);
   const tp = input.taps.get(e.pointerId);
-  if (tp) tp.moved = Math.max(tp.moved, Math.hypot(e.clientX - tp.x, e.clientY - tp.y));
+  if (tp) tp.moved = Math.max(tp.moved, Math.hypot(p.x - tp.x, p.y - tp.y));
   if (e.pointerId === input.stickId) {
-    const s = input.stick, dx = e.clientX - s.ox, dy = e.clientY - s.oy, len = Math.hypot(dx, dy), m = Math.min(len, 60) / (len || 1);
-    s.x = s.ox + dx * m; s.y = s.oy + dy * m;
-    $('knob').style.left = s.x + 'px'; $('knob').style.top = s.y + 'px';
+    const st = input.stick, dx = p.x - st.ox, dy = p.y - st.oy, len = Math.hypot(dx, dy), m = Math.min(len, 60) / (len || 1);
+    st.x = st.ox + dx * m; st.y = st.oy + dy * m;
+    $('knob').style.left = st.x + 'px'; $('knob').style.top = st.y + 'px';
   } else if (e.pointerId === input.lookId) {
-    const dx = e.clientX - input.lookLast.x, dy = e.clientY - input.lookLast.y;
-    input.lookLast = { x: e.clientX, y: e.clientY };
+    const dx = p.x - input.lookLast.x, dy = p.y - input.lookLast.y;
+    input.lookLast = { x: p.x, y: p.y };
     look(dx * 0.0055, -dy * 0.0055);
   }
 });
@@ -554,13 +559,13 @@ function endPointer(e) {
   const tp = input.taps.get(e.pointerId); input.taps.delete(e.pointerId);
   if (e.pointerId === input.stickId) { input.stickId = null; input.stick = null; $('stick').style.display = $('knob').style.display = 'none'; }
   if (e.pointerId === input.lookId) input.lookId = null;
-  if (tp && tp.moved < 16 && performance.now() - tp.t < 350) tapAt(e.clientX, e.clientY);
+  if (tp && tp.moved < 16 && performance.now() - tp.t < 350) { const p = pointerPos(e); tapAt(p.x, p.y); }
 }
 canvas.addEventListener('pointerup', endPointer);
 canvas.addEventListener('pointercancel', endPointer);
 const raycaster = new THREE.Raycaster();
 function tapAt(x, y) {
-  const ndc = new THREE.Vector2((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1);
+  const ndc = new THREE.Vector2((x / viewW()) * 2 - 1, -(y / viewH()) * 2 + 1);
   raycaster.setFromCamera(ndc, camera);
   const hit = raycaster.intersectObjects(PANELS.map(p => p.mesh))[0];
   if (!hit) return;
@@ -775,7 +780,7 @@ function updateHud(dt) {
     const msgOn = msgT > 0;   // a short message takes the hint's place for a moment
     if (!msgOn) hintT -= dt;
     $('hint').style.opacity = msgOn ? 0 : Math.max(0, Math.min(1, hintT / 0.6));
-    $('hint').style.top = innerWidth < 760 && innerHeight > innerWidth ? ($('obj').getBoundingClientRect().bottom + 8) + 'px' : '';   // narrow screens: below the goal box
+    $('hint').style.top = viewW() < 760 && viewH() > viewW() ? ($('obj').getBoundingClientRect().bottom + 8) + 'px' : '';   // narrow screens: below the goal box
   }
   if (startGuideT > 0) startGuideT -= dt;
   updateGuide();
@@ -867,20 +872,38 @@ function updateDoor(dt) {
 }
 
 // ------------------------------------------------------------------ overlays
-// Phones: full screen and landscape when a stage starts. Needs the tap itself; iPhone browsers have no lock, so they get a tip instead.
-function canLockLandscape() { return !!(document.documentElement.requestFullscreen && screen.orientation && screen.orientation.lock); }
+// Phones: when a stage starts, ask for full screen + landscape (needs the tap itself).
+// Many browsers refuse (iPhone, the browsers inside apps, some Android setups): if the page is still upright shortly after, the game is turned by CSS instead.
+const isPhone = () => IS_TOUCH && Math.min(screen.width, screen.height) < 800;
 function goLandscape() {
-  if (!IS_TOUCH || Math.min(screen.width, screen.height) >= 800 || !canLockLandscape()) return;   // phones only
+  if (!isPhone()) return;
+  turnAllowed = false;
+  setTimeout(() => { turnAllowed = true; updateLayout(); }, 700);
+  const el = document.documentElement;
+  if (!el.requestFullscreen || !screen.orientation || !screen.orientation.lock) return;
   const lock = () => screen.orientation.lock('landscape');
-  (document.fullscreenElement ? lock() : document.documentElement.requestFullscreen({ navigationUI: 'hide' }).then(lock))
-    .catch(() => { document.body.classList.add('rotate-tip'); });
+  try { (document.fullscreenElement ? lock() : el.requestFullscreen({ navigationUI: 'hide' }).then(lock)).catch(() => { /* turned by CSS below */ }); } catch (e) { /* same */ }
 }
-if (IS_TOUCH && !canLockLandscape()) document.body.classList.add('rotate-tip');
+function updateLayout() {
+  const inGame = $('menu').classList.contains('hide');
+  turned = isPhone() && inGame && turnAllowed && window.innerHeight > window.innerWidth;
+  const b = document.body, W = viewW(), H = viewH();
+  b.classList.toggle('rot', turned);
+  b.style.width = turned ? W + 'px' : '';
+  b.style.height = turned ? H + 'px' : '';
+  b.style.transform = turned ? `translateX(${window.innerWidth}px) rotate(90deg)` : '';
+  b.style.setProperty('--vw', turned ? W / 100 + 'px' : '1vw');
+  b.style.setProperty('--vh', turned ? H / 100 + 'px' : '1vh');
+  b.classList.toggle('port-narrow', W < 760 && H > W);
+  b.classList.toggle('land-small', H <= 520 && W >= H);
+  resize();
+}
+new MutationObserver(updateLayout).observe($('menu'), { attributes: true, attributeFilter: ['class'] });
 function applyLang() {
   const t = tx();
   document.documentElement.lang = lang;
   $('mT1').innerHTML = lang === 'ja' ? 'グラビティ<br><span>キューブ</span>' : 'GRAVITY<br><span>VAULT</span>';
-  $('mSub').textContent = t.sub; $('mHow').innerHTML = t.how; $('mPlay').textContent = t.play; $('mNote').textContent = t.note; $('mRotate').textContent = t.rotate; $('bLang').textContent = t.lang;
+  $('mSub').textContent = t.sub; $('mHow').innerHTML = t.how; $('mPlay').textContent = t.play; $('mNote').textContent = t.note; $('bLang').textContent = t.lang;
   $('pT').textContent = t.pause; $('pHow').innerHTML = t.how; $('pResume').textContent = t.resume; $('pRetry').textContent = t.retry; $('pMenu').textContent = t.menu;
   $('cShare').textContent = t.share; $('cPlay').textContent = t.play; $('cRetry').textContent = t.again;
   const box = $('mStages'); box.innerHTML = '';
@@ -918,14 +941,14 @@ function showClear() {
 
 // ------------------------------------------------------------------ loop
 function resize() {
-  renderer.setSize(window.innerWidth, window.innerHeight, false);
-  camera.aspect = window.innerWidth / window.innerHeight;
+  renderer.setSize(viewW(), viewH(), false);
+  camera.aspect = viewW() / viewH();
   // like the app: ~95 degrees across on landscape screens; portrait keeps a usable 60-80 degrees vertical
   const hf = THREE.MathUtils.degToRad(95);
   camera.fov = Math.max(60, Math.min(80, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(hf / 2) / camera.aspect))));
   camera.updateProjectionMatrix();
 }
-window.addEventListener('resize', resize);
+window.addEventListener('resize', updateLayout);
 const clock = new THREE.Clock();
 let menuSpin = 0;
 function tick() {
@@ -948,7 +971,7 @@ function tick() {
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }
-resize();
+updateLayout();
 applyLang();
 buildLevel(STAGES[0]);
 requestAnimationFrame(tick);
