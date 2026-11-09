@@ -47,6 +47,7 @@ const T = {
     share: 'X でポストする', next: '次の問題へ', again: 'もう一度',
     shareText: (tier, m, best) => `【グラビティ・キューブ】${tier}を${m}手でクリア！${best ? '★最短' : ''}\n重力を切り替えて解く3Dパズル、あなたは解ける？`,
     rulesTap: IS_TOUCH ? 'タップで説明' : 'Q キーで説明',
+    privacy: 'プライバシーポリシー',
     lang: 'EN', best: (b) => `ベスト ${b} 手`, par: (p) => `最短 ${p} 手`,
   },
   en: {
@@ -76,6 +77,7 @@ const T = {
     share: 'Post on X', next: 'Next puzzle', again: 'Play again',
     shareText: (tier, m, best) => `GRAVITY VAULT: cleared ${tier} in ${m} moves!${best ? ' ★ perfect' : ''}\nA 3D puzzle where you switch gravity. Can you solve it?`,
     rulesTap: IS_TOUCH ? 'Tap for rules' : 'Press Q for rules',
+    privacy: 'Privacy Policy',
     lang: '日本語', best: (b) => `Best ${b}`, par: (p) => `Best ${p}`,
   },
 };
@@ -914,7 +916,7 @@ function applyLang() {
   const t = tx();
   document.documentElement.lang = lang;
   $('mT1').innerHTML = lang === 'ja' ? 'グラビティ<br><span>キューブ</span>' : 'GRAVITY<br><span>VAULT</span>';
-  $('mSub').textContent = t.sub; $('mHow').innerHTML = t.how; $('mPlay').textContent = t.play; $('mNote').textContent = t.note; $('bLang').textContent = t.lang;
+  $('mSub').textContent = t.sub; $('mHow').innerHTML = t.how; $('mPlay').textContent = t.play; $('mNote').textContent = t.note; $('mPrivacy').textContent = t.privacy; $('bLang').textContent = t.lang;
   $('pT').textContent = t.pause; $('pHow').innerHTML = t.how; $('pResume').textContent = t.resume; $('pRetry').textContent = t.retry; $('pMenu').textContent = t.menu;
   $('cShare').textContent = t.share; $('cPlay').textContent = t.play; $('cRetry').textContent = t.again;
   const box = $('mStages'); box.innerHTML = '';
