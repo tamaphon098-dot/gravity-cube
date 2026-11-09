@@ -24,7 +24,8 @@
     font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI","Meiryo",system-ui,sans-serif; touch-action:none; user-select:none; -webkit-user-select:none; }
   #gl { position:fixed; inset:0; width:100%; height:100%; display:block; }
   .box { background:var(--panel); border:1px solid rgba(255,255,255,.12); border-radius:12px; }
-  #obj { position:fixed; left:calc(10px + var(--sl)); top:calc(10px + var(--st)); max-width:min(calc(46*var(--vw)),380px); padding:8px 12px; pointer-events:none; }
+  #obj { position:fixed; left:calc(10px + var(--sl)); top:calc(10px + var(--st)); max-width:min(calc(46*var(--vw)),380px); padding:8px 12px; cursor:pointer; }
+  #obj .tap { font-size:11px; color:var(--acc); margin-top:4px; }
   #obj .h { font-size:11px; color:var(--acc); letter-spacing:.2em; }
   #obj .o { font-size:14px; line-height:1.45; margin:2px 0 4px; }
   #obj .p { font-size:13px; color:var(--acc); }
@@ -99,7 +100,7 @@
 <body>
 <canvas id="gl"></canvas>
 <div id="game" class="hidden">
-  <div id="obj" class="box"><div class="h" id="objH"></div><div class="o" id="objT"></div><div class="p" id="objP"></div></div>
+  <div id="obj" class="box"><div class="h" id="objH"></div><div class="o" id="objT"></div><div class="p" id="objP"></div><div class="tap" id="objTap"></div></div>
   <div class="tr"><button class="round" id="bHint">?</button><button class="round" id="bPause">II</button></div>
   <div id="reticle"></div><div id="ring"></div>
   <div id="focus"></div>
@@ -148,7 +149,7 @@
   </div>
 </div>
 
-<script src="stages.js?v=0926"></script>
-<script type="module" src="game.js?v=0926"></script>
+<script src="stages.js?v=0927"></script>
+<script type="module" src="game.js?v=0927"></script>
 </body>
 </html>

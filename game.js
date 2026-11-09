@@ -46,6 +46,7 @@ const T = {
     star: '★ 最短手数でクリア！', starNo: (p) => `最短は ${p} 手。もっと短くできる？`,
     share: 'X でポストする', next: '次の問題へ', again: 'もう一度',
     shareText: (tier, m, best) => `【グラビティ・キューブ】${tier}を${m}手でクリア！${best ? '★最短' : ''}\n重力を切り替えて解く3Dパズル、あなたは解ける？`,
+    rulesTap: IS_TOUCH ? 'タップで説明' : 'Q キーで説明',
     lang: 'EN', best: (b) => `ベスト ${b} 手`, par: (p) => `最短 ${p} 手`,
   },
   en: {
@@ -74,6 +75,7 @@ const T = {
     star: '★ Perfect — fewest moves!', starNo: (p) => `The best is ${p} moves. Can you do better?`,
     share: 'Post on X', next: 'Next puzzle', again: 'Play again',
     shareText: (tier, m, best) => `GRAVITY VAULT: cleared ${tier} in ${m} moves!${best ? ' ★ perfect' : ''}\nA 3D puzzle where you switch gravity. Can you solve it?`,
+    rulesTap: IS_TOUCH ? 'Tap for rules' : 'Press Q for rules',
     lang: '日本語', best: (b) => `Best ${b}`, par: (p) => `Best ${p}`,
   },
 };
@@ -489,6 +491,7 @@ window.addEventListener('keydown', (e) => {
   if (k === 'r') tryGravity();
   else if (k === 'e') tryInteract();
   else if (k === 'h') requestHint();
+  else if (k === 'q') showRules();
 });
 window.addEventListener('keyup', (e) => input.keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur', () => input.keys.clear());
@@ -559,7 +562,7 @@ function endPointer(e) {
   const tp = input.taps.get(e.pointerId); input.taps.delete(e.pointerId);
   if (e.pointerId === input.stickId) { input.stickId = null; input.stick = null; $('stick').style.display = $('knob').style.display = 'none'; }
   if (e.pointerId === input.lookId) input.lookId = null;
-  if (tp && tp.moved < 16 && performance.now() - tp.t < 350) { const p = pointerPos(e); tapAt(p.x, p.y); }
+  if (tp && tp.moved < 16 && performance.now() - tp.t < 350) { const p = pointerPos(e); bannerT = Math.min(bannerT, 0.4); tapAt(p.x, p.y); }
 }
 canvas.addEventListener('pointerup', endPointer);
 canvas.addEventListener('pointercancel', endPointer);
@@ -575,6 +578,7 @@ function tapAt(x, y) {
 $('gbtn').addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); tryGravity(); });
 $('ctx').addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); tryInteract(); });
 $('bHint').onclick = () => requestHint();
+$('obj').onclick = () => showRules();
 $('bPause').onclick = () => openPause();
 
 // ------------------------------------------------------------------ focus (crosshair trace, like the app)
@@ -632,7 +636,7 @@ function startStage(i) {
   $('bnT').textContent = st.title[lang];
   $('bnO').textContent = st.obj[lang];
   $('bnR').textContent = st.rule[lang];
-  bannerT = 5.5;
+  bannerT = 15;   // the rules stay until the first gravity change, a tap or this time
   startGuideT = save.seenTutorial ? 0 : 16;
   hintT = 0; $('hint').style.opacity = 0;
   if (!IS_TOUCH && !locked) askLock();
@@ -652,6 +656,7 @@ function tryGravity() {
   const p = focus.panel;
   const oldUp = upVec();
   gravity = p.letter;
+  bannerT = Math.min(bannerT, 0.4);
   if (!solved) moves++;   // the move back to the floor after solving is not part of the puzzle
   save.seenTutorial = true; store.set('gc_demo3d', JSON.stringify(save));
   startGuideT = 0;
@@ -746,12 +751,18 @@ function updateGuide() {
 }
 
 // ------------------------------------------------------------------ HUD
+// The goal + rules card again (tap the goal box, or Q on a PC).
+function showRules() {
+  if (!playing()) return;
+  bannerT = 15; msgT = 0; $('msg').style.opacity = 0; hintT = 0; $('hint').style.opacity = 0;
+}
 function flash(text, secs = 2.6) { bannerT = Math.min(bannerT, 0.4); $('msg').textContent = text; $('msg').style.opacity = 1; msgT = secs; }
 function updateObjective() {
   if (!level) return;
   const st = STAGES[stageIdx], t = tx();
   $('objH').textContent = t.objH;
   $('objT').textContent = st.obj[lang];
+  $('objTap').textContent = t.rulesTap;
   const lits = level.b.targets.map((_, i) => `${'ABCD'[i]} ${state && state.lit.has(i) ? '●' : '○'}`).join('  ');
   $('objP').innerHTML = `${t.lit}  ${lits}   ${state ? state.lit.size : 0} / ${level.b.targets.length}<br>${t.moves(moves, st.par)}`;
 }
@@ -943,8 +954,8 @@ function showClear() {
 function resize() {
   renderer.setSize(viewW(), viewH(), false);
   camera.aspect = viewW() / viewH();
-  // like the app: ~95 degrees across on landscape screens; portrait keeps a usable 60-80 degrees vertical
-  const hf = THREE.MathUtils.degToRad(95);
+  // like the app: ~105 degrees across on landscape screens; portrait keeps a usable 60-80 degrees vertical
+  const hf = THREE.MathUtils.degToRad(105);
   camera.fov = Math.max(60, Math.min(80, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(hf / 2) / camera.aspect))));
   camera.updateProjectionMatrix();
 }
